@@ -1,0 +1,24 @@
+Assignment to structs
+DOT expressions
+check that while loops only accept bool expressions
+
+questions
+if (true) {
+    /* blah */
+    return;     // here we have a return, but we also need to jump to after else
+                // so instructions would be (return, jump)
+}
+else {
+    /* blah */
+}
+
+where do we check if inner structs were initialized?
+struct node {
+    int x;
+    struct node next;
+};
+
+how to handle jumps with 2 labels
+
+multiplying big numbers
+
