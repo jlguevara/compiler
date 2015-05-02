@@ -22,3 +22,5 @@ how to handle jumps with 2 labels
 
 multiplying big numbers
 
+topological sort in the presence of cycles (loops)
+how to label basic block in order of execution

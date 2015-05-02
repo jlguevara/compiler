@@ -18,17 +18,16 @@ options
 
 @members
 {
-    private BasicBlock mainBlock;
-    private int labelIndex = 1;
-    private int nextRegister = 0;
-    private boolean storeGlobal;
-    private String branchOp;
-    private String chainOp;
-    private boolean chainedExpression;
+    private int labelIndex = 1;     /* next label number to use */
+    private int nextRegister = 0;   /* next register number to use */
+    private boolean storeGlobal;    /* true to store a global variable */
+    private String branchOp;        /* what branch operation to use */
+    private String chainOp; /* what operation to use during chained && or || */ 
+    private boolean chainedExpression; /* are we in a chained expression? */
     private String lvalueMember; 
 
 
-    private HashMap<String, String> registerMap;
+    private HashMap<String, String> registerMap; /* id -> register */
 
     private List<BasicBlock> funBlocks = new LinkedList<BasicBlock>();
 
@@ -48,15 +47,17 @@ options
     public List<BasicBlock> getFunBlocks() {
         return funBlocks;
     }
+    
+    private BasicBlock createExitBlock() {
+        BasicBlock exitBlock = new BasicBlock(getNextLabel());
+        exitBlock.addInstruction(new Instruction("ret"));
+        return exitBlock;
+    }
 }
 
 
 translate
-    returns [BasicBlock block = null]
    :  ^(PROGRAM t=types d=declarations[globalTable] f=functions[globalTable])
-         {
-            $block = mainBlock;
-         }
    ;
 
 types
@@ -102,6 +103,7 @@ decl_list[HashMap<String, Type> scope]
          (id=ID
             {
                 scope.put($id.text, $t.t);
+                /* only fill register map if we are inside a function */
                 if (registerMap != null) {
                    registerMap.put($id.text, "r" + nextRegister);
                     nextRegister++; 
@@ -128,7 +130,7 @@ function[HashMap<String, Type> globalScope]
         {   entryBlock = new BasicBlock($id.text); 
             funBlocks.add(entryBlock);
 
-            currentExitBlock = new BasicBlock(getNextLabel());
+            currentExitBlock = createExitBlock(); 
 
             globalScope.put($id.text, fun); 
         } 
@@ -136,10 +138,9 @@ function[HashMap<String, Type> globalScope]
         d=declarations[localScope] 
         s=statement_list[localScope, entryBlock]) 
     {
-        if (fun.returnType == null) {
-            BasicBlock lastBlock = $s.block;
-            lastBlock.addOutgoing(currentExitBlock);
-            currentExitBlock.addIncoming(lastBlock);
+        if ($s.block != currentExitBlock) {
+            $s.block.addOutgoing(currentExitBlock);
+            currentExitBlock.addIncoming($s.block);
         }
     }
    ;
