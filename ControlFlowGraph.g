@@ -210,8 +210,6 @@ assignment[HashMap<String, Type> scope, BasicBlock currentBlock]
 
         if (storeGlobal) {
             op = new Instruction("storeglobal", $e.register, $l.text);
-
-            currentBlock.addInstruction(op);
             storeGlobal = false;
         }
         else {
@@ -223,10 +221,83 @@ assignment[HashMap<String, Type> scope, BasicBlock currentBlock]
             else {
                 op = new Instruction("mov", $e.register, $l.register);
             }
-            currentBlock.addInstruction(op);
         }
+        
+        currentBlock.addInstruction(op);
     }
    ;
+
+read[HashMap<String, Type> scope, BasicBlock currentBlock]
+   :  ^(ast=READ l=lvalue[scope, currentBlock])
+        {
+            Instruction op = new Instruction("read", $l.register);
+            currentBlock.addInstruction(op);
+        }
+   ;
+
+lvalue[HashMap<String, Type> localScope, BasicBlock currentBlock]
+    returns [String register]
+   :  id=ID
+    {
+            Type varType = localScope.get($id.text);
+            if (varType != null) {
+                $register = registerMap.get($id.text);
+            }
+            else {
+                storeGlobal = true;
+                $register = "r" + nextRegister;
+                nextRegister++;
+
+                Instruction ins = new Instruction("loadglobal", $id.text, 
+                                    $register);
+                currentBlock.addInstruction(ins);
+            }
+    }
+   |  ^(ast=DOT l=lvalue_load[localScope, currentBlock] id=ID)
+    {
+        Instruction inst;
+            $register = "r" + nextRegister;
+            nextRegister++;
+        // check if it's a simple member reference like "a.b"
+        if ($l.text.indexOf('.') == $l.text.lastIndexOf('.')) {
+           inst = new Instruction("mov", $l.register, $register);
+        }   
+        else {
+            inst = new Instruction("loadai", $l.register, lvalueMember, 
+                        $register);
+        }
+
+        currentBlock.addInstruction(inst);
+        lvalueMember = $id.text;
+    }
+   ;
+
+lvalue_load[HashMap<String, Type> localScope, BasicBlock currentBlock]
+    returns [String register]
+   :  id=ID
+    {
+            Type varType = localScope.get($id.text);
+            if (varType != null) {
+                $register = registerMap.get($id.text);
+            }
+            else {
+                $register = "r" + nextRegister;
+                nextRegister++;
+
+                Instruction ins = new Instruction("loadglobal", $id.text, 
+                                    $register);
+                currentBlock.addInstruction(ins);
+            }
+    }
+   |  ^(ast=DOT l=lvalue_load[localScope, currentBlock] id=ID)
+    {
+        Instruction inst;
+        $register = "r" + nextRegister;
+        nextRegister++;
+        inst = new Instruction("loadai", $l.register, $id, $register);
+
+        currentBlock.addInstruction(inst);
+    }
 
 print[HashMap<String, Type> scope, BasicBlock currentBlock]
     @init { Instruction op = null; }
@@ -236,14 +307,6 @@ print[HashMap<String, Type> scope, BasicBlock currentBlock]
             if (op == null) 
                 op = new Instruction("print");
             op.addOperand($e.register);
-            currentBlock.addInstruction(op);
-        }
-   ;
-
-read[HashMap<String, Type> scope, BasicBlock currentBlock]
-   :  ^(ast=READ l=lvalue[scope, currentBlock])
-        {
-            Instruction op = new Instruction("read", $l.register);
             currentBlock.addInstruction(op);
         }
    ;
@@ -391,42 +454,6 @@ invocation_stmt[HashMap<String, Type> localScope, BasicBlock currentBlock]
         }
    ;
 
-lvalue[HashMap<String, Type> localScope, BasicBlock currentBlock]
-    returns [String register]
-   :  id=ID
-    {
-            Type varType = localScope.get($id.text);
-            if (varType != null) {
-                $register = registerMap.get($id.text);
-            }
-            else {
-                storeGlobal = true;
-                $register = "r" + nextRegister;
-                nextRegister++;
-
-                Instruction ins = new Instruction("loadglobal", $id.text, 
-                                    $register);
-                currentBlock.addInstruction(ins);
-            }
-    }
-   |  ^(ast=DOT l=lvalue[localScope, currentBlock] id=ID)
-    {
-        Instruction inst;
-            $register = "r" + nextRegister;
-            nextRegister++;
-        // check if it's a simple member reference like "a.b"
-        if ($l.text.indexOf('.') == $l.text.lastIndexOf('.')) {
-           inst = new Instruction("mov", $l.register, $register);
-        }   
-        else {
-            inst = new Instruction("loadai", $l.register, lvalueMember, 
-                        $register);
-        }
-
-        currentBlock.addInstruction(inst);
-        lvalueMember = $id.text;
-    }
-   ;
 
 expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
     returns [String register]
