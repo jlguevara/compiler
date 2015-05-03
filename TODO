@@ -1,6 +1,6 @@
-Assignment to structs
-DOT expressions
 check that while loops only accept bool expressions
+how to handle reading in members of structs
+check that labels are correct for branch
 
 questions
 if (true) {
