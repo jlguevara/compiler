@@ -222,7 +222,6 @@ assignment[HashMap<String, Type> scope, BasicBlock currentBlock]
                 op = new Instruction("mov", $e.register, $l.register);
             }
         }
-        
         currentBlock.addInstruction(op);
     }
    ;
@@ -255,19 +254,7 @@ lvalue[HashMap<String, Type> localScope, BasicBlock currentBlock]
     }
    |  ^(ast=DOT l=lvalue_load[localScope, currentBlock] id=ID)
     {
-        Instruction inst;
-            $register = "r" + nextRegister;
-            nextRegister++;
-        // check if it's a simple member reference like "a.b"
-        if ($l.text.indexOf('.') == $l.text.lastIndexOf('.')) {
-           inst = new Instruction("mov", $l.register, $register);
-        }   
-        else {
-            inst = new Instruction("loadai", $l.register, lvalueMember, 
-                        $register);
-        }
-
-        currentBlock.addInstruction(inst);
+        $register = $l.register;
         lvalueMember = $id.text;
     }
    ;
@@ -294,10 +281,11 @@ lvalue_load[HashMap<String, Type> localScope, BasicBlock currentBlock]
         Instruction inst;
         $register = "r" + nextRegister;
         nextRegister++;
-        inst = new Instruction("loadai", $l.register, $id, $register);
+        inst = new Instruction("loadai", $l.register, $id.text, $register);
 
         currentBlock.addInstruction(inst);
     }
+   ;
 
 print[HashMap<String, Type> scope, BasicBlock currentBlock]
     @init { Instruction op = null; }
@@ -320,12 +308,11 @@ conditional[HashMap<String, Type> scope, BasicBlock currentBlock]
             }
    :  ^(ast=IF g=expression[scope, currentBlock] 
         {   
-            chainedExpression = false; 
-            testOp = branchOp; 
+            chainedExpression = false; /* end chain for this block */
+            testOp = branchOp;          /* save the branch op */
         }
         t=block[scope, trueBlock] (e=block[scope, falseBlock])?)
     {
-        
         Instruction op = new Instruction(testOp, $g.register);
 
         // handle true edges
@@ -366,36 +353,32 @@ loop[HashMap<String, Type> scope, BasicBlock currentBlock]
             }
    :  ^(ast=WHILE e=expression[scope, eBlock] 
         {   
-            chainedExpression = false; 
-            testOp = branchOp; 
+            chainedExpression = false; /* done with the chain of && and || */
+            testOp = branchOp;          /* save the branch op */
         }  
         b=block[scope, bodyBlock])
     {
-        // current block jump to e
-        Instruction op = new Instruction("jumpi", eBlock.getLabel());
-        currentBlock.addInstruction(op);
-
-        // expression break operation
-        op = new Instruction(testOp, $e.register, nextBlock.getLabel(), 
-                bodyBlock.getLabel());
-
-        eBlock.addInstruction(op);
-        
-        // body jump back to test expression
-        op = new Instruction("jumpi", eBlock.getLabel());
-        bodyBlock.addInstruction(op);
-
         // edge to expression
         currentBlock.addOutgoing(eBlock);
         eBlock.addIncoming(currentBlock);
+
+        Instruction op = new Instruction("jumpi", eBlock.getLabel());
+        currentBlock.addInstruction(op);
 
         // edge from expression to body block
         eBlock.addOutgoing(bodyBlock);
         bodyBlock.addIncoming(eBlock);
 
+        op = new Instruction(testOp, $e.register, nextBlock.getLabel(), 
+                bodyBlock.getLabel());
+        eBlock.addInstruction(op);
+        
         // edge from body block to expression
-        bodyBlock.addOutgoing(eBlock);
-        eBlock.addIncoming(bodyBlock);
+        $b.block.addOutgoing(eBlock);
+        eBlock.addIncoming($b.block);
+
+        op = new Instruction("jumpi", eBlock.getLabel());
+        bodyBlock.addInstruction(op);
 
         // edge from expression to next block (when expression is false)
         eBlock.addOutgoing(nextBlock);
