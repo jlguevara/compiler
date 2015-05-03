@@ -24,3 +24,6 @@ multiplying big numbers
 
 topological sort in the presence of cycles (loops)
 how to label basic block in order of execution
+removing unnessary jumps after return statements
+
+why so many loads i.e. z = x + y requires that we load x and y into new registers.  Why not just do add rx, ry, rz?

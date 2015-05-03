@@ -402,10 +402,9 @@ return_stmt[HashMap<String, Type> scope, BasicBlock currentBlock]
    :  ^(ast=RETURN  (exp=expression[scope, currentBlock]
                 { op = new Instruction("storeret", $exp.register);
                 })?)
-      {   
-        if (op == null) {
-            op = new Instruction("ret");
-        }
+    {   
+        Instruction jumpOut = new Instruction("jumpi", 
+            currentExitBlock.getLabel());
         currentBlock.addInstruction(op);
 
         currentBlock.addOutgoing(currentExitBlock);
@@ -621,7 +620,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
             $register = "r" + nextRegister;
             nextRegister++;
 
-            Instruction op = new Instruction("loadi", "" + 1, $register);
+            Instruction op = new Instruction("loadi", "1", $register);
             currentBlock.addInstruction(op);
         }
    |  ast=FALSE
@@ -629,7 +628,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
             $register = "r" + nextRegister;
             nextRegister++;
 
-            Instruction op = new Instruction("loadi", "" + 0, $register);
+            Instruction op = new Instruction("loadi", "0", $register);
             currentBlock.addInstruction(op);
         }
    |  ^(ast=NEW id=ID)
@@ -647,7 +646,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
             $register = "r" + nextRegister;
             nextRegister++;
 
-            Instruction op = new Instruction("loadi", "" + 0, $register);
+            Instruction op = new Instruction("loadi", "0", $register);
             currentBlock.addInstruction(op);
         }
    ;
