@@ -250,6 +250,10 @@ public class BasicBlock {
         return outgoing;
     }
 
+    public List<BasicBlock> getIncoming() {
+        return incoming;
+    }
+
     public String toString() {
         return label;
     }

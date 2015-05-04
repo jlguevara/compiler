@@ -77,28 +77,19 @@ public class Mini
        return builder.toString();
    }
 
-   private static String getFunctionString(BasicBlock block) 
-   {
+   private static String getFunctionString(BasicBlock block) {
        StringBuilder builder = new StringBuilder();
-       Queue<BasicBlock> queue = new LinkedList<BasicBlock>();
+       Stack<BasicBlock> stack = new Stack<BasicBlock>();
        HashMap<String, BasicBlock> map = new HashMap<String, BasicBlock>();
-       List<BasicBlock> links;
-       BasicBlock nextBlock, tmp;
+       BasicBlock nextBlock;
 
-       queue.add(block);
+       stack.push(block);
        map.put(block.getLabel(), block);
 
-       while (!queue.isEmpty()) {
-           nextBlock = queue.remove();
+       while (!stack.empty()) {
+           nextBlock = stack.pop();
            builder.append(getBlockString(nextBlock));
-           links = nextBlock.getOutgoing();
-           for (int i = 0; i < links.size(); i++) {
-               tmp = links.get(i);
-               if (map.get(tmp.getLabel()) == null) {
-                    queue.add(tmp);
-                    map.put(tmp.getLabel(), tmp);
-               }
-           }
+           addChildren(nextBlock, stack, map);
        }
        return builder.toString();
    }
@@ -112,6 +103,30 @@ public class Mini
             builder.append("\t" + op + "\n");
        
        return builder.toString();
+   }
+
+   private static void addChildren(BasicBlock block, Stack<BasicBlock> stack,
+           HashMap<String, BasicBlock> map) {
+       boolean flag;
+       List<BasicBlock> lst = block.getOutgoing();
+       BasicBlock child;
+
+       // have to traverse the list backwards to get the order right
+       for (int i = lst.size() - 1; i >= 0; i--) { 
+           child = lst.get(i);
+
+           // check that there are no dependencies, being careful about
+           // loops: expression -> body -> expression
+           flag = true;
+           for (BasicBlock parent : child.getIncoming()) {
+                if (map.get(parent.getLabel()) == null) {
+                    flag = false;
+                    break;
+                }
+           }
+           if (flag) 
+               stack.push(child);
+       }
    }
 
    private static void parseParameters(String [] args)
