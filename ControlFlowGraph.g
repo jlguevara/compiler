@@ -26,6 +26,7 @@ options
     private boolean chainedExpression; /* are we in a chained expression? */
     private String lvalueMember; 
 
+    private int maxArgCount; /* max number of arguments for invocation call */
 
     private HashMap<String, String> registerMap; /* id -> register */
 
@@ -41,6 +42,12 @@ options
     // Generate the next label to use
     private String getNextLabel() {
         return "L" + labelIndex++;
+    }
+
+    // update maxArgument
+    private void updateArgCount(int count) {
+        if (count > maxArgCount)
+            maxArgCount = count;
     }
 
     // return the list of graphs
@@ -125,6 +132,7 @@ function[HashMap<String, Type> globalScope]
         registerMap = new HashMap<String, String>();
         nextRegister = 0;
         FunType fun = new FunType();
+        maxArgCount = 0;
     }
    :  ^(ast=FUN id=ID 
         {   entryBlock = new BasicBlock($id.text); 
@@ -142,6 +150,7 @@ function[HashMap<String, Type> globalScope]
             $s.block.addOutgoing(currentExitBlock);
             currentExitBlock.addIncoming($s.block);
         }
+        entryBlock.setMaxArgCount(maxArgCount);
     }
    ;
 
@@ -193,13 +202,15 @@ block[HashMap<String, Type> scope, BasicBlock currentBlock]
     returns [BasicBlock block]
    :  ^(BLOCK s=statement_list[scope, currentBlock])
     {
+        System.out.println("block");
         $block = $s.block;
     }
    ;
 
 statement_list[HashMap<String, Type> scope, BasicBlock currentBlock]
     returns [BasicBlock block = currentBlock]
-   :  ^(STMTS (s=statement[scope, currentBlock] { $block = $s.nextBlock; })*)
+   :  ^(STMTS (s=statement[scope, block] 
+        { $block = $s.nextBlock; })*)
    ;
 
 assignment[HashMap<String, Type> scope, BasicBlock currentBlock]
@@ -209,6 +220,7 @@ assignment[HashMap<String, Type> scope, BasicBlock currentBlock]
         Instruction op;
 
         if (storeGlobal) {
+
             op = new Instruction("storeglobal", $e.register, $l.text);
             storeGlobal = false;
         }
@@ -244,12 +256,6 @@ lvalue[HashMap<String, Type> localScope, BasicBlock currentBlock]
             }
             else {
                 storeGlobal = true;
-                $register = "r" + nextRegister;
-                nextRegister++;
-
-                Instruction ins = new Instruction("loadglobal", $id.text, 
-                                    $register);
-                currentBlock.addInstruction(ins);
             }
     }
    |  ^(ast=DOT l=lvalue_load[localScope, currentBlock] id=ID)
@@ -313,6 +319,7 @@ conditional[HashMap<String, Type> scope, BasicBlock currentBlock]
         }
         t=block[scope, trueBlock] (e=block[scope, falseBlock])?)
     {
+        System.out.println("if");
         Instruction op = new Instruction(testOp, $g.register);
 
         // handle true edges
@@ -433,6 +440,7 @@ invocation_stmt[HashMap<String, Type> localScope, BasicBlock currentBlock]
 
             op = new Instruction("call", $id.text, "" + argIndex);
             currentBlock.addInstruction(op);
+            updateArgCount(argIndex);
         }
    ;
 
@@ -669,5 +677,6 @@ invocation_exp[HashMap<String, Type> localScope, BasicBlock currentBlock]
             }
             op = new Instruction("call", $id.text, "" + argIndex);
             currentBlock.addInstruction(op);
+            updateArgCount(argIndex);
         }
    ;

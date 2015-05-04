@@ -8,6 +8,10 @@ public class BasicBlock {
     private List<BasicBlock> outgoing = new LinkedList<BasicBlock>();
     private List<Instruction> instructions = new LinkedList<Instruction>();
 
+    /* used for entry blocks */
+    private int maxArgCount; 
+    private int numOfLocals;
+
     public BasicBlock(String label) {
         this.label = label;
     }
@@ -208,6 +212,22 @@ public class BasicBlock {
 
     public String getLabel() {
         return this.label;
+    }
+
+    public int getMaxArgCount() {
+        return maxArgCount;
+    }
+
+    public void setMaxArgCount(int count) {
+        maxArgCount = count;
+    }
+
+    public int getNumOfLocals() {
+        return numOfLocals;
+    }
+
+    public void setNumOfLocals(int num) {
+        numOfLocals = num;
     }
 
     public void addIncoming(BasicBlock parent) {

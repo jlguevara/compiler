@@ -1,3 +1,4 @@
+fix conditionals and loops to take just true or false
 check that while loops only accept bool expressions
 how to handle reading in members of structs
 check that labels are correct for branch
@@ -27,3 +28,5 @@ how to label basic block in order of execution
 removing unnessary jumps after return statements
 
 why so many loads i.e. z = x + y requires that we load x and y into new registers.  Why not just do add rx, ry, rz?
+
+how to handle conditionals with only "true" or "false" in them
