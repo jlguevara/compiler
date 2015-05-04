@@ -37,7 +37,7 @@ options
     private HashMap<String, Type> globalTable = new HashMap<String, Type>();   
     private HashMap<String, StructType> structTable = 
         new HashMap<String, StructType>();
-    private FunType currentFun;
+    //private FunType currentFun;
 
     // Generate the next label to use
     private String getNextLabel() {
@@ -54,6 +54,10 @@ options
     public List<BasicBlock> getFunBlocks() {
         return funBlocks;
     }
+   
+   public HashMap<String, Type> getGlobals() {
+      return globalTable;
+   }
     
     private BasicBlock createExitBlock() {
         BasicBlock exitBlock = new BasicBlock(getNextLabel());

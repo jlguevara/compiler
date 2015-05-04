@@ -7,4 +7,8 @@ public class IntType extends Type {
     public static IntType getInstance() {
         return instance;
     }
+
+    public int size() {
+       return 8;
+    }
 }

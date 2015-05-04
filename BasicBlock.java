@@ -21,7 +21,6 @@ public class BasicBlock {
         List<Instruction> asm = new LinkedList<Instruction>();
 
         while (!instructions.isEmpty()) {
-           System.out.println("LABEL: " + label);
             Instruction ins = instructions.remove(0);
             String opcode = ins.getOpcode();
             List<String> operands = ins.getOperands();
@@ -43,7 +42,7 @@ public class BasicBlock {
 
             else if (opcode.equals("call")) {
                 target = operands.get(0);
-                asm.add(new Instruction("callq", target));
+                asm.add(new Instruction("call", target));
             }
 
             else if (opcode.equals("new")) {
@@ -53,7 +52,6 @@ public class BasicBlock {
 
             else if (opcode.equals("del")) {
                 System.out.println("DIV");
-                System.exit(1);
             }
 
             else if (opcode.equals("mov")) {
@@ -74,7 +72,6 @@ public class BasicBlock {
 
             else if (opcode.equals("loadai")) {
                 System.out.println("DIV");
-                System.exit(1);
             }
 
             else if (opcode.equals("loadi")) {
@@ -84,13 +81,15 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("loadglobal")) {
-                System.out.println("DIV");
-                System.exit(1);
+               source = operands.get(0);
+               target = operands.get(1);
+               asm.add(new Instruction("movq", source + "(%rip)", target));
             }
 
             else if (opcode.equals("storeglobal")) {
-                System.out.println("DIV");
-                System.exit(1);
+               source = operands.get(0);
+               target = operands.get(1);
+               asm.add(new Instruction("movq", source, target + "(%rip)"));
             }
 
             else if (opcode.equals("comp")) {
@@ -138,9 +137,17 @@ public class BasicBlock {
                 
             }
 
+            else if (opcode.equals("add")) {
+                String left = operands.get(0);
+                String right = operands.get(1);
+                target = operands.get(2);
+
+                asm.add(new Instruction("movq", left, target));
+                asm.add(new Instruction("subq", right, target));
+            }
+
             else if (opcode.equals("div")) {
                 System.out.println("DIV");
-                System.exit(1);
             }
 
             else if (opcode.equals("ret")) {
@@ -180,7 +187,6 @@ public class BasicBlock {
 
             else {
                 System.out.println("unknown op: " + opcode);
-                System.exit(1);
             }
         }
         instructions = asm;
@@ -235,6 +241,10 @@ public class BasicBlock {
 
     public int getNumOfLocals() {
         return numOfLocals;
+    }
+
+    public void updateLocalCount() {
+       numOfLocals++;
     }
 
     public void setNumOfLocals(int num) {

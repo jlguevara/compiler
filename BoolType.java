@@ -7,5 +7,9 @@ public class BoolType extends Type {
     public static BoolType getInstance() {
         return instance;
     }
+
+    public int size() {
+       return 8;
+    }
 }
 

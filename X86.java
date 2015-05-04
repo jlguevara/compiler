@@ -4,15 +4,22 @@ public class X86 {
     private List<BasicBlock> funs;
     private String filename;
     private StringBuilder out;
+    private HashMap<String, Type> globals;
 
-    public X86(String filename, List<BasicBlock> funs) {
+    public X86(String filename, List<BasicBlock> funs, 
+          HashMap<String, Type> globals) {
         this.filename = filename;
         this.funs = funs;
+        this.globals = globals;
         out = new StringBuilder();
     }
 
     public String go() {
         out.append("\t.file \"" + filename + "\"\n");
+
+        for (String key: globals.keySet()) {
+           out.append("\t.comm " + key + " 8, 8\n");
+        }
 
         out.append("\t.section\t.rodata\n");
         out.append(".LC0:\n");

@@ -31,13 +31,14 @@ public class Mini
          //System.out.println(json);
 
          typeCheck(tree, tokens);
-         List<BasicBlock> listOfBlocks = generateControlFlowGraph(tree, tokens);
+         ControlFlowGraph graph = generateControlFlowGraph(tree, tokens);
+         List<BasicBlock> listOfBlocks = graph.getFunBlocks();
          String iloc = getIloc(listOfBlocks);
          System.out.println(iloc);
          if (_dumpIL) {
              writeFile(iloc, _inputFile.replace(".mini", ".il"));
          }
-         X86 x86 = new X86(_inputFile, listOfBlocks);
+         X86 x86 = new X86(_inputFile, listOfBlocks, graph.getGlobals());
          String asm = x86.go();
          System.out.println(asm);
          writeFile(asm, _inputFile.replace(".mini", ".s"));
@@ -220,7 +221,7 @@ public class Mini
       }
    }
 
-   private static List<BasicBlock> generateControlFlowGraph(CommonTree tree, 
+   private static ControlFlowGraph  generateControlFlowGraph(CommonTree tree, 
            CommonTokenStream tokens)
    {
        ControlFlowGraph graph = null;
@@ -236,8 +237,7 @@ public class Mini
        {
            error(e.toString());
        }
-        
-       return graph.getFunBlocks();
+       return graph;
    }
 
    private static void error(String msg)
