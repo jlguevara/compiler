@@ -11,12 +11,13 @@ public class BasicBlock {
     /* used for entry blocks */
     private int maxArgCount; 
     private int numOfLocals;
+    private boolean isEntryBlock;
 
     public BasicBlock(String label) {
         this.label = label;
     }
 
-    public void transform(HashMap<String, String> table) {
+    public void transform() {
         List<Instruction> asm = new LinkedList<Instruction>();
 
         while (!instructions.isEmpty()) {
@@ -228,6 +229,14 @@ public class BasicBlock {
 
     public void setNumOfLocals(int num) {
         numOfLocals = num;
+    }
+
+    public boolean isEntryBlock() {
+        return isEntryBlock;
+    }
+
+    public void setEntryBlock(boolean flag) {
+        isEntryBlock = flag;
     }
 
     public void addIncoming(BasicBlock parent) {

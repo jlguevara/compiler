@@ -37,6 +37,9 @@ public class Mini
          if (_dumpIL) {
              writeFile(iloc, _inputFile.replace(".mini", ".il"));
          }
+         X86 x86 = new X86(_inputFile, listOfBlocks);
+         String asm = x86.go();
+         System.out.println(asm);
       }
    }
 
@@ -88,6 +91,7 @@ public class Mini
 
        while (!stack.empty()) {
            nextBlock = stack.pop();
+           map.put(nextBlock.getLabel(), nextBlock);
            builder.append(getBlockString(nextBlock));
            addChildren(nextBlock, stack, map);
        }
@@ -115,11 +119,16 @@ public class Mini
        for (int i = lst.size() - 1; i >= 0; i--) { 
            child = lst.get(i);
 
+           // skip if child has already been visited
+           if (map.get(child.getLabel()) != null)
+               continue;
+
            // check that there are no dependencies, being careful about
            // loops: expression -> body -> expression
            flag = true;
            for (BasicBlock parent : child.getIncoming()) {
-                if (map.get(parent.getLabel()) == null) {
+                if (map.get(parent.getLabel()) == null &&
+                        !child.getOutgoing().contains(parent)) {
                     flag = false;
                     break;
                 }

@@ -1,4 +1,4 @@
-FILES=Mini.java 
+FILES=Mini.java X86.java 
 CLASSPATH=-cp ./antlr-3.5.2-complete.jar:./javax.json-1.0.4.jar:.
 
 

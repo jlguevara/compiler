@@ -36,12 +36,65 @@ public class X86 {
         }
     }
 
-    private void addFunctionCode(BasicBlock fun) {
+    private void addFunctionEpilogue() {
+        out.append("\tmovq %ebp %esp\n");
+        out.append("\tpopq %ebp\n");
+        out.append("\tretq");
     }
 
-    private void addFunctionEpilogue() {
-        out.append("movq %ebp %esp\n");
-        out.append("popq %ebp\n");
-        out.append("retq");
-    }
+    private void addFunctionCode(BasicBlock fun) {
+       Stack<BasicBlock> stack = new Stack<BasicBlock>();
+       HashMap<String, BasicBlock> map = new HashMap<String, BasicBlock>();
+       BasicBlock nextBlock;
+
+       stack.push(fun);
+
+       while (!stack.empty()) {
+           nextBlock = stack.pop();
+           nextBlock.transform();
+           map.put(nextBlock.getLabel(), nextBlock);
+           addBlockString(nextBlock);
+           addChildren(nextBlock, stack, map);
+       }
+   }
+
+   private void addBlockString(BasicBlock block) {
+       List<Instruction> instructions = block.getInstructions();
+
+       if (!block.isEntryBlock())
+            out.append(block + ":\n");
+
+       for (Instruction op : instructions)
+            out.append("\t" + op + "\n");
+   }
+
+   private void addChildren(BasicBlock block, Stack<BasicBlock> stack,
+           HashMap<String, BasicBlock> map) {
+       boolean flag;
+       List<BasicBlock> lst = block.getOutgoing();
+       BasicBlock child;
+
+       // have to traverse the list backwards to get the order right
+       for (int i = lst.size() - 1; i >= 0; i--) { 
+           child = lst.get(i);
+
+           // skip if child has already been visited
+           if (map.get(child.getLabel()) != null)
+               continue;
+
+           // check that there are no dependencies, being careful about
+           // loops: expression -> body -> expression
+           flag = true;
+           for (BasicBlock parent : child.getIncoming()) {
+                if (map.get(parent.getLabel()) == null &&
+                        !child.getOutgoing().contains(parent)) {
+                    flag = false;
+                    break;
+                }
+           }
+           if (flag) 
+               stack.push(child);
+       }
+   }
 }
+

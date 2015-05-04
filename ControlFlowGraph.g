@@ -136,6 +136,7 @@ function[HashMap<String, Type> globalScope]
     }
    :  ^(ast=FUN id=ID 
         {   entryBlock = new BasicBlock($id.text); 
+            entryBlock.setEntryBlock(true);
             funBlocks.add(entryBlock);
 
             currentExitBlock = createExitBlock(); 
@@ -202,7 +203,6 @@ block[HashMap<String, Type> scope, BasicBlock currentBlock]
     returns [BasicBlock block]
    :  ^(BLOCK s=statement_list[scope, currentBlock])
     {
-        System.out.println("block");
         $block = $s.block;
     }
    ;
@@ -319,7 +319,6 @@ conditional[HashMap<String, Type> scope, BasicBlock currentBlock]
         }
         t=block[scope, trueBlock] (e=block[scope, falseBlock])?)
     {
-        System.out.println("if");
         Instruction op = new Instruction(testOp, $g.register);
 
         // handle true edges
