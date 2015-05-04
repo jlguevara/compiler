@@ -21,6 +21,7 @@ public class BasicBlock {
         List<Instruction> asm = new LinkedList<Instruction>();
 
         while (!instructions.isEmpty()) {
+           System.out.println("LABEL: " + label);
             Instruction ins = instructions.remove(0);
             String opcode = ins.getOpcode();
             List<String> operands = ins.getOperands();
@@ -154,18 +155,27 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("print")) {
-                System.out.println("DIV");
-                System.exit(1);
+               source = operands.get(0);
+               asm.add(new Instruction("movq", "$.LC0", "%rdi"));
+               asm.add(new Instruction("movq", source, "%rsi"));
+               asm.add(new Instruction("movq", "$0", "%rax"));
+               asm.add(new Instruction("call", "printf"));
             }
 
             else if (opcode.equals("println")) {
-                System.out.println("DIV");
-                System.exit(1);
+               source = operands.get(0);
+               asm.add(new Instruction("movq", "$.LC1", "%rdi"));
+               asm.add(new Instruction("movq", source, "%rsi"));
+               asm.add(new Instruction("movq", "$0", "%rax"));
+               asm.add(new Instruction("call", "printf"));
             }
 
             else if (opcode.equals("read")) {
-                System.out.println("DIV");
-                System.exit(1);
+               source = operands.get(0);
+               asm.add(new Instruction("movq", "$.LC0", "%rdi"));
+               asm.add(new Instruction("movq", source, "%rsi"));
+               asm.add(new Instruction("movq", "$0", "%rax"));
+               asm.add(new Instruction("call", "scanf"));
             }
 
             else {

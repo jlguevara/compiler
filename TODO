@@ -4,14 +4,6 @@ how to handle reading in members of structs
 check that labels are correct for branch
 
 questions
-if (true) {
-    /* blah */
-    return;     // here we have a return, but we also need to jump to after else
-                // so instructions would be (return, jump)
-}
-else {
-    /* blah */
-}
 
 where do we check if inner structs were initialized?
 struct node {
@@ -23,8 +15,6 @@ how to handle jumps with 2 labels
 
 multiplying big numbers
 
-topological sort in the presence of cycles (loops)
-how to label basic block in order of execution
 removing unnessary jumps after return statements
 
 why so many loads i.e. z = x + y requires that we load x and y into new registers.  Why not just do add rx, ry, rz?

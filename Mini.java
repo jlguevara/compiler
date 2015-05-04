@@ -40,6 +40,7 @@ public class Mini
          X86 x86 = new X86(_inputFile, listOfBlocks);
          String asm = x86.go();
          System.out.println(asm);
+         writeFile(asm, _inputFile.replace(".mini", ".s"));
       }
    }
 

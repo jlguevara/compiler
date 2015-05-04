@@ -13,6 +13,13 @@ public class X86 {
 
     public String go() {
         out.append("\t.file \"" + filename + "\"\n");
+
+        out.append("\t.section\t.rodata\n");
+        out.append(".LC0:\n");
+        out.append("\t.string \"%ld\"\n");
+        out.append(".LC1:\n");
+        out.append("\t.string \"%ld\\n\"\n");
+      
         out.append("\t.text\n");
         for (BasicBlock f : funs) {
             addFunctionPrologue(f);            
@@ -29,17 +36,18 @@ public class X86 {
         out.append("\t.type " + fun.getLabel() + ", @function\n");
         out.append(fun.getLabel() + ":\n");
 
-        out.append("\tpushq %ebp\n");
+        out.append("\tpushq %rbp\n");
+        out.append("\tmovq %rsp, %rbp\n");
         if (argSize > 0) {
             argSize *= 8;
-            out.append("subq $" + argSize + "%esp\n");
+            out.append("\tsubq $" + argSize + ", %rsp\n");
         }
     }
 
     private void addFunctionEpilogue() {
-        out.append("\tmovq %ebp %esp\n");
-        out.append("\tpopq %ebp\n");
-        out.append("\tretq");
+        out.append("\tmovq %rbp, %rsp\n");
+        out.append("\tpopq %rbp\n");
+        out.append("\tretq\n");
     }
 
     private void addFunctionCode(BasicBlock fun) {

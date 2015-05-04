@@ -1,4 +1,4 @@
-FILES=Mini.java X86.java 
+FILES=Mini.java X86.java BasicBlock.java
 CLASSPATH=-cp ./antlr-3.5.2-complete.jar:./javax.json-1.0.4.jar:.
 
 
@@ -25,7 +25,7 @@ antlr.generated.types: TypeCheck.g
 	touch antlr.generated.types
 
 test: ${FILES}
-	java ${CLASSPATH} Mini tests/test.mini 
+	java ${CLASSPATH} Mini test.mini 
 
 clean:
 	\rm *generated* MiniParser.java MiniLexer.java ToJSON.java TypeCheck.java Mini.tokens ToJSON.tokens ControlFlowGraph.java *.class

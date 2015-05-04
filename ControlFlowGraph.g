@@ -407,11 +407,12 @@ return_stmt[HashMap<String, Type> scope, BasicBlock currentBlock]
     @init { Instruction op = null; }
    :  ^(ast=RETURN  (exp=expression[scope, currentBlock]
                 { op = new Instruction("storeret", $exp.register);
+                  currentBlock.addInstruction(op);
                 })?)
     {   
         Instruction jumpOut = new Instruction("jumpi", 
             currentExitBlock.getLabel());
-        currentBlock.addInstruction(op);
+        currentBlock.addInstruction(jumpOut);
 
         currentBlock.addOutgoing(currentExitBlock);
         currentExitBlock.addIncoming(currentBlock);
