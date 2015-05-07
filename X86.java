@@ -18,8 +18,12 @@ public class X86 {
         out.append("\t.file \"" + filename + "\"\n");
 
         for (String key: globals.keySet()) {
-           out.append("\t.comm " + key + " 8, 8\n");
+           if (!(globals.get(key) instanceof FunType))
+              out.append("\t.comm " + key + " 8, 8\n");
         }
+        
+        // global variable used to read in values
+        out.append("\t.comm readtmp 8, 8\n");
 
         out.append("\t.section\t.rodata\n");
         out.append(".LC0:\n");

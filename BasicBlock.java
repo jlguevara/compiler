@@ -10,7 +10,6 @@ public class BasicBlock {
 
     /* used for entry blocks */
     private int maxArgCount; 
-    private int numOfLocals;
     private boolean isEntryBlock;
 
     public BasicBlock(String label) {
@@ -111,7 +110,7 @@ public class BasicBlock {
             else if (opcode.equals("cbrle")) {
                 target = operands.get(1);
                 asm.add(new Instruction("jle", target));
-            }
+           }
 
             else if (opcode.equals("jumpi")) {
                 target = operands.get(0);
@@ -147,7 +146,15 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("div")) {
-                System.out.println("DIV");
+               String left = operands.get(0);
+               String right = operands.get(1);
+               target = operands.get(2);
+
+               asm.add(new Instruction("movq", left, "%rax"));
+               asm.add(new Instruction("movq", left, "%rdx"));
+               asm.add(new Instruction("sarq", "$63", "%rdx"));
+               asm.add(new Instruction("idivq", right));
+               asm.add(new Instruction("movq", "%rax", target));
             }
 
             else if (opcode.equals("ret")) {
@@ -178,11 +185,12 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("read")) {
-               source = operands.get(0);
+               target = source = operands.get(0);
                asm.add(new Instruction("movq", "$.LC0", "%rdi"));
-               asm.add(new Instruction("movq", source, "%rsi"));
+               asm.add(new Instruction("movq", "$readtmp", "%rsi"));
                asm.add(new Instruction("movq", "$0", "%rax"));
                asm.add(new Instruction("call", "scanf"));
+               asm.add(new Instruction("movq", "readtmp", target));
             }
 
             else {
@@ -237,18 +245,6 @@ public class BasicBlock {
 
     public void setMaxArgCount(int count) {
         maxArgCount = count;
-    }
-
-    public int getNumOfLocals() {
-        return numOfLocals;
-    }
-
-    public void updateLocalCount() {
-       numOfLocals++;
-    }
-
-    public void setNumOfLocals(int num) {
-        numOfLocals = num;
     }
 
     public boolean isEntryBlock() {
