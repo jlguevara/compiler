@@ -372,15 +372,17 @@ loop[HashMap<String, Type> scope, BasicBlock currentBlock]
         currentBlock.addOutgoing(eBlock);
         eBlock.addIncoming(currentBlock);
 
+         /*
         Instruction op = new Instruction("jumpi", eBlock.getLabel());
         currentBlock.addInstruction(op);
+         */
 
         // edge from expression to body block
         eBlock.addOutgoing(bodyBlock);
         bodyBlock.addIncoming(eBlock);
 
-        op = new Instruction(testOp, $e.register, nextBlock.getLabel(), 
-                bodyBlock.getLabel());
+        Instruction op = new Instruction(testOp, $e.register, 
+            nextBlock.getLabel(), bodyBlock.getLabel());
         eBlock.addInstruction(op);
         
         // edge from body block to expression
