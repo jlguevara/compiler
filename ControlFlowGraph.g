@@ -369,7 +369,6 @@ loop[HashMap<String, Type> scope, BasicBlock currentBlock]
         }  
         b=block[scope, bodyBlock])
     {
-System.out.println("BODY: " + bodyBlock);
         // edge to expression
         currentBlock.addOutgoing(eBlock);
         eBlock.addIncoming(currentBlock);
@@ -392,7 +391,7 @@ System.out.println("BODY: " + bodyBlock);
         eBlock.addIncoming($b.block);
 
         op = new Instruction("jumpi", eBlock.getLabel());
-        bodyBlock.addInstruction(op);
+        $b.block.addInstruction(op);
 
         // edge from expression to next block (when expression is false)
         eBlock.addOutgoing(nextBlock);

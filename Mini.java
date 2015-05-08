@@ -38,10 +38,12 @@ public class Mini
          if (_dumpIL) {
              writeFile(iloc, _inputFile.replace(".mini", ".il"));
          }
+         /*
          X86 x86 = new X86(_inputFile, listOfBlocks, graph.getGlobals());
          String asm = x86.go();
          System.out.println(asm);
          writeFile(asm, _inputFile.replace(".mini", ".s"));
+         */
       }
    }
 
