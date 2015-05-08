@@ -7,6 +7,7 @@ public class BasicBlock {
     private List<BasicBlock> incoming = new LinkedList<BasicBlock>();
     private List<BasicBlock> outgoing = new LinkedList<BasicBlock>();
     private List<Instruction> instructions = new LinkedList<Instruction>();
+    private BasicBlock loopHeader;
 
     /* used for entry blocks */
     private int maxArgCount; 
@@ -253,6 +254,14 @@ public class BasicBlock {
 
     public void setEntryBlock(boolean flag) {
         isEntryBlock = flag;
+    }
+
+    public BasicBlock getLoopHeader() {
+       return loopHeader;
+    }
+
+    public void setLoopHeader(BasicBlock val) {
+       loopHeader = val;
     }
 
     public void addIncoming(BasicBlock parent) {

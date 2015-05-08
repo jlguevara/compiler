@@ -120,6 +120,7 @@ public class Mini
            HashMap<String, BasicBlock> map) {
        List<BasicBlock> lst = block.getOutgoing();
        BasicBlock child;
+       boolean seenAllParents;
 
        // have to traverse the list backwards to get the order right
        for (int i = lst.size() - 1; i >= 0; i--) { 
@@ -128,6 +129,19 @@ public class Mini
            // skip if child has already been visited
            if (map.get(child.getLabel()) != null)
                continue;
+           // enforce topological ordering
+           seenAllParents = true;
+           for (BasicBlock parent : child.getIncoming()) {
+               if (map.get(parent.getLabel()) == null) {
+                  // check if we are in a loop
+                  if (parent.getLoopHeader() == child)
+                     continue;
+                  seenAllParents = false;
+                  break;
+               }
+           }
+           if (!seenAllParents)
+              continue;
 
             stack.push(child);
        }
