@@ -324,16 +324,12 @@ conditional[HashMap<String, Type> scope, BasicBlock currentBlock]
         t=block[scope, trueBlock] (e=block[scope, falseBlock])?)
     {
         Instruction op = new Instruction(testOp, $g.register);
-System.out.println("CURRENT: " + currentBlock);
 
         // handle true edges
         currentBlock.addOutgoing(trueBlock);
         trueBlock.addIncoming(currentBlock);
         $t.block.addOutgoing(nextBlock);
         nextBlock.addIncoming($t.block);
-        // add jump instruction to skip over else clause
-        Instruction jumpOp = new Instruction("jumpi", nextBlock.getLabel());
-        $t.block.addInstruction(jumpOp);
         
         // handle false edges
         if ($e.block != null) {
@@ -343,6 +339,10 @@ System.out.println("CURRENT: " + currentBlock);
             falseBlock.addIncoming(currentBlock);
             $e.block.addOutgoing(nextBlock);
             nextBlock.addIncoming($e.block);
+
+           // add jump instruction to skip over else clause
+           Instruction jumpOp = new Instruction("jumpi", nextBlock.getLabel());
+           $t.block.addInstruction(jumpOp);
         }
         else {
             op.addOperand(nextBlock.getLabel());
