@@ -379,7 +379,6 @@ expression[HashMap<String, Type> localScope]
                     " invalid operands, both must be ints");
                 System.exit(1); 
             }
-            $type = IntType.getInstance();
         }
         else if (leftType instanceof BoolType || rightType instanceof 
                     BoolType) {
@@ -389,7 +388,6 @@ expression[HashMap<String, Type> localScope]
                     " invalid operands, both must be bool");
                 System.exit(1); 
             }
-            $type = BoolType.getInstance();
         }
         else if (leftType instanceof StructType || 
                 rightType instanceof StructType ||
@@ -404,13 +402,13 @@ expression[HashMap<String, Type> localScope]
                     ": invalid operands, must be structs."); 
                 System.exit(1); 
             }
-            $type = leftType;
         } 
         else {
             System.out.println("Line " + $ast.line + 
                 ": unknow type"); 
             System.exit(1); 
         } 
+         $type = BoolType.getInstance();
     }
    |  ^((ast=AND | ast=OR)
          lft=expression[localScope] rht=expression[localScope])
@@ -434,7 +432,15 @@ expression[HashMap<String, Type> localScope]
                     " expects integer  operands");
                 System.exit(1); 
             }
-            $type = IntType.getInstance();
+
+            String operator = $ast.text;
+            if (operator.equals("+") || operator.equals("-") || 
+                  operator.equals("*") || operator.equals("/")) {
+               $type = IntType.getInstance();
+            }
+            else {
+               $type = BoolType.getInstance();
+            }
         }
    |  ^(ast=NOT exp=expression[localScope])
       {

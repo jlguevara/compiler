@@ -82,6 +82,7 @@ public class Mini
        return builder.toString();
    }
 
+   /* Generate string for each function */
    private static String getFunctionString(BasicBlock block) {
        StringBuilder builder = new StringBuilder();
        Stack<BasicBlock> stack = new Stack<BasicBlock>();
@@ -100,6 +101,7 @@ public class Mini
        return builder.toString();
    }
 
+   /* generate iloc string for a basic block */
    private static String getBlockString(BasicBlock block) {
        StringBuilder builder = new StringBuilder();
        List<Instruction> instructions = block.getInstructions();
@@ -111,9 +113,9 @@ public class Mini
        return builder.toString();
    }
 
+   /* add decendants of basic block */
    private static void addChildren(BasicBlock block, Stack<BasicBlock> stack,
            HashMap<String, BasicBlock> map) {
-       boolean flag;
        List<BasicBlock> lst = block.getOutgoing();
        BasicBlock child;
 
@@ -125,18 +127,7 @@ public class Mini
            if (map.get(child.getLabel()) != null)
                continue;
 
-           // check that there are no dependencies, being careful about
-           // loops: expression -> body -> expression
-           flag = true;
-           for (BasicBlock parent : child.getIncoming()) {
-                if (map.get(parent.getLabel()) == null &&
-                        !child.getOutgoing().contains(parent)) {
-                    flag = false;
-                    break;
-                }
-           }
-           if (flag) 
-               stack.push(child);
+            stack.push(child);
        }
    }
 

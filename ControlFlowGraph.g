@@ -324,6 +324,7 @@ conditional[HashMap<String, Type> scope, BasicBlock currentBlock]
         t=block[scope, trueBlock] (e=block[scope, falseBlock])?)
     {
         Instruction op = new Instruction(testOp, $g.register);
+System.out.println("CURRENT: " + currentBlock);
 
         // handle true edges
         currentBlock.addOutgoing(trueBlock);
@@ -368,6 +369,7 @@ loop[HashMap<String, Type> scope, BasicBlock currentBlock]
         }  
         b=block[scope, bodyBlock])
     {
+System.out.println("BODY: " + bodyBlock);
         // edge to expression
         currentBlock.addOutgoing(eBlock);
         eBlock.addIncoming(currentBlock);
@@ -474,7 +476,6 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
 
         Instruction instruction =
             new Instruction(opcode, $lft.register, $rht.register, $register);
-
         currentBlock.addInstruction(instruction);
     }
    |  ^((ast=EQ | ast=LT | ast=GT | ast=NE | ast=LE | ast=GE)
@@ -484,6 +485,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
             String operation = $ast.text, chainOp = null;
 
             if (operation.equals("==")) {
+System.out.println("EQUAL");
                 branchOp = "cbrne";
                 chainOp = "moveqi";
             }
@@ -500,6 +502,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
                 chainOp = "movne";
             }
             else if (operation.equals("<=")) {
+System.out.println("LESS THAN OR EQUAL");
                 branchOp = "cbrgt";
                 chainOp = "movle";
             }
