@@ -87,11 +87,12 @@ public class X86 {
             out.append("\t" + op + "\n");
    }
 
+   /* add decendants of basic block */
    private void addChildren(BasicBlock block, Stack<BasicBlock> stack,
            HashMap<String, BasicBlock> map) {
-       boolean flag;
        List<BasicBlock> lst = block.getOutgoing();
        BasicBlock child;
+       boolean seenAllParents;
 
        // have to traverse the list backwards to get the order right
        for (int i = lst.size() - 1; i >= 0; i--) { 
@@ -100,20 +101,26 @@ public class X86 {
            // skip if child has already been visited
            if (map.get(child.getLabel()) != null)
                continue;
-
-           // check that there are no dependencies, being careful about
-           // loops: expression -> body -> expression
-           flag = true;
+           // enforce topological ordering
+           seenAllParents = true;
            for (BasicBlock parent : child.getIncoming()) {
-                if (map.get(parent.getLabel()) == null &&
-                        !child.getOutgoing().contains(parent)) {
-                    flag = false;
-                    break;
-                }
+               if (map.get(parent.getLabel()) == null) {
+                  // check if we are in a loop
+                  if (parent.getLoopHeader() == child)
+                     continue;
+                  seenAllParents = false;
+                  break;
+               }
            }
-           if (flag) 
-               stack.push(child);
+           if (!seenAllParents)
+              continue;
+
+            stack.push(child);
        }
    }
+
+
+
+
 }
 

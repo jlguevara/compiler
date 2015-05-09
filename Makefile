@@ -25,7 +25,7 @@ antlr.generated.types: TypeCheck.g
 	touch antlr.generated.types
 
 test: ${FILES}
-	java ${CLASSPATH} Mini bench_factorize.mini 
+	java ${CLASSPATH} Mini test.mini 
 
 clean:
 	\rm *generated* MiniParser.java MiniLexer.java ToJSON.java TypeCheck.java Mini.tokens ToJSON.tokens ControlFlowGraph.java *.class
