@@ -1,7 +1,6 @@
 fix conditionals and loops to take just true or false
 check that while loops only accept bool expressions
-how to handle reading in members of structs
-check that labels are correct for branch
+fix needless branches to exit block (might have to use a flag to check that we are on the last return statement of a function)
 
 questions
 
@@ -14,7 +13,6 @@ struct node {
 
 multiplying big numbers
 
-removing unnessary jumps after return statements
 
 why so many loads i.e. z = x + y requires that we load x and y into new registers.  Why not just do add rx, ry, rz?
 

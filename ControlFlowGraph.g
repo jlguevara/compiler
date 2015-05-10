@@ -151,7 +151,7 @@ function[HashMap<String, Type> globalScope]
         d=declarations[localScope] 
         s=statement_list[localScope, entryBlock]) 
     {
-        if ($s.block != currentExitBlock) {
+        if (!$s.block.getOutgoing().contains(currentExitBlock)) {
             $s.block.addOutgoing(currentExitBlock);
             currentExitBlock.addIncoming($s.block);
         }
@@ -197,7 +197,7 @@ statement[HashMap<String, Type> scope, BasicBlock currentBlock]
       |  s=read[scope, currentBlock]
       |  s=conditional[scope, currentBlock] { $nextBlock = $s.block; }
       |  s=loop[scope, currentBlock] { $nextBlock = $s.block; }
-      |  s=delete[scope, currentBlock]
+      |  delete[scope, currentBlock]
       |  s=return_stmt[scope, currentBlock] { $nextBlock = $s.block; }
       |  invocation_stmt[scope, currentBlock]
       )
@@ -406,7 +406,7 @@ delete[HashMap<String, Type> scope, BasicBlock currentBlock]
    ;
 
 return_stmt[HashMap<String, Type> scope, BasicBlock currentBlock]
-    returns [BasicBlock block]
+   returns [BasicBlock block]
     @init { Instruction op = null; }
    :  ^(ast=RETURN  (exp=expression[scope, currentBlock]
                 { op = new Instruction("storeret", $exp.register);
@@ -419,7 +419,7 @@ return_stmt[HashMap<String, Type> scope, BasicBlock currentBlock]
 
         currentBlock.addOutgoing(currentExitBlock);
         currentExitBlock.addIncoming(currentBlock);
-        $block = currentExitBlock;
+         $block = currentExitBlock;
     }
    ;
 
@@ -480,7 +480,6 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
             String operation = $ast.text, chainOp = null;
 
             if (operation.equals("==")) {
-System.out.println("EQUAL");
                 branchOp = "cbrne";
                 chainOp = "moveqi";
             }
@@ -497,7 +496,6 @@ System.out.println("EQUAL");
                 chainOp = "movne";
             }
             else if (operation.equals("<=")) {
-System.out.println("LESS THAN OR EQUAL");
                 branchOp = "cbrgt";
                 chainOp = "movle";
             }
