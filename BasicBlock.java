@@ -24,7 +24,7 @@ public class BasicBlock {
             Instruction ins = instructions.remove(0);
             String opcode = ins.getOpcode();
             List<String> operands = ins.getOperands();
-            String source, target, offset;
+            String source, target, offset, left, right;
 
             if (opcode.equals("loadinargument")) {
                 source = operands.get(1);
@@ -33,6 +33,12 @@ public class BasicBlock {
                 String srcAddress = getAddressOfArg(source);
                 asm.add(new Instruction("movq", srcAddress, target)); 
             } 
+
+            else if (opcode.equals("loadret")) {
+               target = operands.get(0);
+               source = "%rax";
+               asm.add(new Instruction("movq", source, target));
+            }
 
             else if (opcode.equals("storeoutargument")) {
                 source = operands.get(0);
@@ -64,14 +70,10 @@ public class BasicBlock {
             else if (opcode.equals("storeai")) {
                 source = operands.get(0);
                 String base = operands.get(1);
-                offset = operands.get(2);
+                offset = "$" + operands.get(2);
                 target = offset + "(" + base + ")";
 
                 asm.add(new Instruction("movq", source, target));
-            }
-
-            else if (opcode.equals("loadai")) {
-                System.out.println("DIV");
             }
 
             else if (opcode.equals("loadi")) {
@@ -80,27 +82,41 @@ public class BasicBlock {
                 asm.add(new Instruction("movq", source, target));
             }
 
+            else if (opcode.equals("loadai")) {
+               String base = operands.get(0);
+               offset = operands.get(1);
+               target = operands.get(2);
+
+               asm.add(new Instruction("movq", "$" + offset + "(" + base + ")",
+                        target));
+            }
+
             else if (opcode.equals("loadglobal")) {
                source = operands.get(0);
                target = operands.get(1);
-               asm.add(new Instruction("movq", source + "(%rip)", target));
+               asm.add(new Instruction("movq", source, target));
             }
 
             else if (opcode.equals("storeglobal")) {
                source = operands.get(0);
-               target = operands.get(1);
-               asm.add(new Instruction("movq", source, target + "(%rip)"));
+               target = "$" + operands.get(1);
+               asm.add(new Instruction("movq", source, target));
             }
 
             else if (opcode.equals("comp")) {
-                String x = operands.get(0);
-                String y = operands.get(1);
-                asm.add(new Instruction("cmpq", x, y));
+                left = operands.get(0);
+                right = operands.get(1);
+                asm.add(new Instruction("cmpq", left, right));
             }
 
-            else if (opcode.equals("cbrne")) {
-                target = operands.get(1);
-                asm.add(new Instruction("jne", target)); 
+            else if (opcode.equals("cbreq")) {
+               target = operands.get(1);
+               asm.add(new Instruction("je", target));
+            }
+
+            else if (opcode.equals("cbrge")) {
+               target = operands.get(1);
+               asm.add(new Instruction("jge", target));
             }
 
             else if (opcode.equals("cbrgt")) {
@@ -111,16 +127,35 @@ public class BasicBlock {
             else if (opcode.equals("cbrle")) {
                 target = operands.get(1);
                 asm.add(new Instruction("jle", target));
-           }
+            }
+
+            else if (opcode.equals("cbrlt")) {
+                target = operands.get(1);
+                asm.add(new Instruction("jl", target));
+            }
+
+            else if (opcode.equals("cbrne")) {
+                target = operands.get(1);
+                asm.add(new Instruction("jne", target)); 
+            }
 
             else if (opcode.equals("jumpi")) {
                 target = operands.get(0);
                 asm.add(new Instruction("jmp", target));
             }
 
+            else if (opcode.equals("add")) {
+                left = operands.get(0);
+                right = operands.get(1);
+                target = operands.get(2);
+
+                asm.add(new Instruction("movq", left, target));
+                asm.add(new Instruction("addq", right, target));
+            }
+
             else if (opcode.equals("sub")) {
-                String left = operands.get(0);
-                String right = operands.get(1);
+                left = operands.get(0);
+                right = operands.get(1);
                 target = operands.get(2);
 
                 asm.add(new Instruction("movq", left, target));
@@ -128,27 +163,18 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("mult")) {
-                String left = operands.get(0);
-                String right = operands.get(1);
+                left = operands.get(0);
+                right = operands.get(1);
                 target = operands.get(2);
 
-                asm.add(new Instruction("movq", left, target));
-                asm.add(new Instruction("imulq", right, target));
-                
-            }
-
-            else if (opcode.equals("add")) {
-                String left = operands.get(0);
-                String right = operands.get(1);
-                target = operands.get(2);
-
-                asm.add(new Instruction("movq", left, target));
-                asm.add(new Instruction("subq", right, target));
+                asm.add(new Instruction("movq", left, "%rax"));
+                asm.add(new Instruction("imulq", right));
+                asm.add(new Instruction("movq", "%rdx", target));
             }
 
             else if (opcode.equals("div")) {
-               String left = operands.get(0);
-               String right = operands.get(1);
+               left = operands.get(0);
+               right = operands.get(1);
                target = operands.get(2);
 
                asm.add(new Instruction("movq", left, "%rax"));
@@ -159,7 +185,7 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("ret")) {
-                // do nothing
+                // do nothing, keep instruction
             }
             
             else if (opcode.equals("storeret")) {
@@ -194,6 +220,33 @@ public class BasicBlock {
                asm.add(new Instruction("movq", "readtmp", target));
             }
 
+            else if (opcode.equals("and")) {
+               left = operands.get(0);
+               right = operands.get(1);
+               target = operands.get(2);
+
+               asm.add(new Instruction("movq", left, target));
+               asm.add(new Instruction("andq", right, target));
+            }
+
+            else if (opcode.equals("or")) {
+               left = operands.get(0);
+               right = operands.get(1);
+               target = operands.get(2);
+
+               asm.add(new Instruction("movq", left, target));
+               asm.add(new Instruction("orq", right, target));
+            }
+
+            else if (opcode.equals("xori")) {
+               left = operands.get(0);
+               right = "$" + operands.get(1);
+               target = operands.get(2);
+
+               asm.add(new Instruction("movq", left, target));
+               asm.add(new Instruction("xorq", right, target));
+            }
+
             else {
                 System.out.println("unknown op: " + opcode);
             }
@@ -201,6 +254,7 @@ public class BasicBlock {
         instructions = asm;
     }
 
+    // used to store out arguments
     private String getAddressToStoreArg(String argIndex) {
         int index = Integer.parseInt(argIndex);
 
@@ -215,6 +269,7 @@ public class BasicBlock {
             return index + "(%rsp)";
     }
 
+    // used to load in arguments
     private String getAddressOfArg(String param) {
         int index = Integer.parseInt(param);
 
