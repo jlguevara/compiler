@@ -5,6 +5,8 @@ fix needless branches to exit block (might have to use a flag to check that we a
 
 questions
 
+source and target for adq? addq? sarq?
+
 where do we check if inner structs were initialized?
 struct node {
     int x;
