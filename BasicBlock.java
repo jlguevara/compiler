@@ -57,7 +57,9 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("del")) {
-                System.out.println("DIV");
+               source = operands.get(0);
+               asm.add(new Instruction("movq", source, "%rdi"));
+               asm.add(new Instruction("call", "free"));
             }
 
             else if (opcode.equals("mov")) {
@@ -65,6 +67,48 @@ public class BasicBlock {
                 target = operands.get(1);
 
                 asm.add(new Instruction("movq", source, target));
+            }
+
+            else if (opcode.equals("moveq")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmove", source, target));
+            }
+
+            else if (opcode.equals("movge")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmovge", source, target));
+            }
+
+            else if (opcode.equals("movgt")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmovg", source, target));
+            }
+
+            else if (opcode.equals("movle")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmovle", source, target));
+            }
+
+            else if (opcode.equals("movlt")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmovl", source, target));
+            }
+
+            else if (opcode.equals("movne")) {
+               source = operands.get(0);
+               target = operands.get(1);
+
+               asm.add(new Instruction("cmovne", source, target));
             }
 
             else if (opcode.equals("storeai")) {
@@ -185,7 +229,7 @@ public class BasicBlock {
             }
 
             else if (opcode.equals("ret")) {
-                // do nothing, keep instruction
+               asm.add(new Instruction("ret"));
             }
             
             else if (opcode.equals("storeret")) {
@@ -287,7 +331,7 @@ public class BasicBlock {
             String target) {
         int size = 8 * elements.split(",").length;
         asm.add(new Instruction("movq", "" + size, "%rdi"));
-        asm.add(new Instruction("callq", "malloc"));
+        asm.add(new Instruction("call", "malloc"));
         asm.add(new Instruction("movq", "%rax", target));
     }
 

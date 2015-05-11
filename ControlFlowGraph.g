@@ -481,7 +481,7 @@ expression[HashMap<String, Type> localScope, BasicBlock currentBlock]
 
             if (operation.equals("==")) {
                 branchOp = "cbrne";
-                chainOp = "moveqi";
+                chainOp = "moveq";
             }
             else if (operation.equals("<")) {
                 branchOp = "cbrge";
