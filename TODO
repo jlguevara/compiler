@@ -4,18 +4,7 @@ check that while loops only accept bool expressions
 fix needless branches to exit block (might have to use a flag to check that we are on the last return statement of a function)
 
 questions
-
-source and target for adq? addq? sarq?
-
-where do we check if inner structs were initialized?
-struct node {
-    int x;
-    struct node next;
-};
-
-
-multiplying big numbers
-
+do i have cmpq in the wrong order?
 
 why so many loads i.e. z = x + y requires that we load x and y into new registers.  Why not just do add rx, ry, rz?
 

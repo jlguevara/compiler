@@ -15,6 +15,7 @@ public class BasicBlock {
 
    /* used for register allocation */
    private Set<String> genSet, killSet;
+   private Set<String> liveout = new HashSet<String>();
 
    public BasicBlock(String label) {
       this.label = label;
@@ -214,9 +215,8 @@ public class BasicBlock {
             right = operands.get(1);
             target = operands.get(2);
 
-            asm.add(new Instruction("movq", left, "%rax"));
-            asm.add(new Instruction("imulq", right));
-            asm.add(new Instruction("movq", "%rdx", target));
+            asm.add(new Instruction("movq", left, target));
+            asm.add(new Instruction("imulq", right, target));
          }
 
          else if (opcode.equals("div")) {
@@ -301,12 +301,11 @@ public class BasicBlock {
       instructions = asm;
    }
 
-
-   private void computeGenAndKillSet()   {
+   public void computeGenAndKillSet()   {
       genSet = new HashSet<String>();
       killSet = new HashSet<String>();
 
-      String target, offset, left, right, opcode;
+      String target = null, offset, left, right, opcode;
       List<String> operands, sources;
 
       for (Instruction ins : instructions) {
@@ -365,49 +364,87 @@ public class BasicBlock {
 
          else if (opcode.equals("addq")) {
             sources.add(operands.get(0));
+            sources.add(operands.get(1));
             target = operands.get(1);
          }
 
          else if (opcode.equals("subq")) {
             sources.add(operands.get(0));
+            sources.add(operands.get(1));
             target = operands.get(1);
          }
 
-         /* need to implement this
-            else if (opcode.equals("imulq")) {
-            left = operands.get(0);
-            right = operands.get(1);
-            target = operands.get(2);
+         else if (opcode.equals("imulq")) {
+            sources.add(operands.get(0));
+            sources.add(operands.get(1));
+            target = operands.get(1);
+         }
 
-            asm.add(new Instruction("imulq", right));
-            }
+         else if (opcode.equals("idiv")) {
+            sources.add(operands.get(0));
+            sources.add("%rdx");
+            sources.add("%rax");
+            target = "%rax"; 
+         }
 
-            else if (opcode.equals("idiv")) {
-            left = operands.get(0);
-            right = operands.get(1);
-            target = operands.get(2);
-
-            asm.add(new Instruction("idivq", right));
-            }
-
-            asm.add(new Instruction("sarq", "$63", "%rdx"));
-            */
+         else if (opcode.equals("sarq")) {
+            sources.add(operands.get(1));
+            target = operands.get(1);
+         }
 
          else if (opcode.equals("andq")) {
             sources.add(operands.get(0));
+            sources.add(operands.get(1));
             target = operands.get(1);
          }
 
          else if (opcode.equals("orq")) {
             sources.add(operands.get(0));
+            sources.add(operands.get(1));
             target = operands.get(1);
          }
 
          else if (opcode.equals("xori")) {
             sources.add(operands.get(0));
+            sources.add(operands.get(1));
             target = operands.get(1);
          }
+
+         for (String source : sources) {
+            if (!killSet.contains(source))
+               genSet.add(source);
+         }
+         killSet.add(target);
       }
+   }
+
+   /* Get liveout of this block.  Returns true if liveout set changed */
+   public boolean liveOut() {
+      Set<String> tmp, result = new HashSet<String>();
+
+      for (BasicBlock child : outgoing) {
+         tmp = new HashSet<String>(child.getLiveOut());
+         tmp.removeAll(child.getKillSet());  /* liveout(m) - killset(m) */
+         tmp.addAll(child.getGenSet());      /* gen(m) union tmp(m) */
+         result.addAll(tmp);
+      }
+      if (!liveout.containsAll(result)) {
+         liveout = result;
+         return true;
+      }
+      return false;
+   }
+
+   public Set<String> getGenSet() {
+      return genSet;
+   }
+
+   public Set<String> getKillSet() {
+      return killSet;
+   }
+
+   public Set<String> getLiveOut() {
+      return liveout;
    }
 
    // used to store out arguments
