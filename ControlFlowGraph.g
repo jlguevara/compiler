@@ -31,6 +31,7 @@ options
     private HashMap<String, String> registerMap; /* id -> register */
 
     private List<BasicBlock> funBlocks = new LinkedList<BasicBlock>();
+    private List<BasicBlock> exitBlocks = new LinkedList<BasicBlock>();
 
     BasicBlock currentExitBlock; 
 
@@ -54,6 +55,10 @@ options
     public List<BasicBlock> getFunBlocks() {
         return funBlocks;
     }
+
+   public List<BasicBlock> getExitBlocks() {
+      return exitBlocks;
+   }
    
    public HashMap<String, Type> getGlobals() {
       return globalTable;
@@ -144,6 +149,7 @@ function[HashMap<String, Type> globalScope]
             funBlocks.add(entryBlock);
 
             currentExitBlock = createExitBlock(); 
+            exitBlocks.add(currentExitBlock);
 
             globalScope.put($id.text, fun); 
         } 

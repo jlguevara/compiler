@@ -39,7 +39,9 @@ public class Mini
              writeFile(iloc, _inputFile.replace(".mini", ".il"));
          }
          /*
-         X86 x86 = new X86(_inputFile, listOfBlocks, graph.getGlobals());
+         List<BasicBlock> exitBlocks = graph.getExitBlocks();
+         X86 x86 = new X86(_inputFile, listOfBlocks, exitBlocks,
+                        graph.getGlobals());
          String asm = x86.go();
          System.out.println(asm);
          writeFile(asm, _inputFile.replace(".mini", ".s"));

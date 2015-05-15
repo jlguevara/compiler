@@ -154,7 +154,9 @@ public class BasicBlock {
          else if (opcode.equals("comp")) {
             left = operands.get(0);
             right = operands.get(1);
-            asm.add(new Instruction("cmpq", left, right));
+
+            /* in reverse order because intel is weird */
+            asm.add(new Instruction("cmpq", right, left));
          }
 
          else if (opcode.equals("cbreq")) {

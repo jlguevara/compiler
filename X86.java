@@ -2,12 +2,13 @@ import java.util.*;
 
 public class X86 {
     private List<BasicBlock> funs;
+    private List<BasicBlock> exitBlocks;
     private String filename;
     private StringBuilder out;
     private HashMap<String, Type> globals;
 
     public X86(String filename, List<BasicBlock> funs, 
-          HashMap<String, Type> globals) {
+          List<BasicBlock> exitBlocks, HashMap<String, Type> globals) {
         this.filename = filename;
         this.funs = funs;
         this.globals = globals;
@@ -119,8 +120,57 @@ public class X86 {
        }
    }
 
+   public void allocateRegisters() {
+      List<BasicBlock> lstOfBlocks;
+      for (BasicBlock block: funs) {
+         lstOfBlocks = null; //convertTreeToList(block);
+         for (BasicBlock b : lstOfBlocks) {
+            b.computeGenAndKillSet();
+         }
+         
+      }
+   }
 
+   /* generate liveout for a single function */
+   private void generateLiveOut(BasicBlock tail) {
+      List<BasicBlock> blocks = null; //convertTreeToList(tail); 
 
+      /* generate gen and kill sets */
+      for (BasicBlock b : blocks) 
+         b.computeGenAndKillSet();
+      
+      boolean changed = true;
+      while (changed) {
+         changed = false;
+         for (BasicBlock block : blocks) {
+            if (block.liveOut())
+               changed = true;
+         }
+      }
+   }
 
+   /*
+   // converts graph into an unordered list 
+   private List<BasicBlock> convertTreeToList(BasicBlock tail) {
+      List<BasicBlock> blocks = new LinkedList<BasicBlock>();
+      List<BasicBlock> queue = new LinkedList<BasicBlock>();
+      HashMap<String, BasicBlock> map = new HashMap<String, BasicBlock>();
+
+      BasicBlock tmp; 
+      queue.add(tail);
+
+      while (!queue.isEmpty()) {
+         tmp = queue.remove(0);
+         blocks.add(tmp);
+
+         map.put(tmp.getLabel(), tmp);
+         for (BasicBlock parent : tmp.getIncoming()) {
+            if (map.get(parent.getLabel()) == null)
+               queue.add(parent);
+               map.put(parent.getLabel(), parent);
+         }
+      }
+   }
+   */
 }
 
